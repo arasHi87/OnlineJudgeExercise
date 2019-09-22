@@ -1,17 +1,10 @@
-#include <iostream>
+#include <cstdio>
 using namespace std;
-
+int a, b, c;
 int main() {
-    int n;
-    cin >> n;
-    for ( int i = 0; i < n; i++ ) {
-        int a, b, t;
-        cin >> a >> b;
-        while ( b != 0 ) {
-            t = b;
-            b = a%b;
-            a = t;
-        }
-        cout << a << '\n';
+    scanf("%d", &c);
+    while(~scanf("%d%d", &a, &b)) {
+        while((a%=b)&&(b%=a));
+        printf("%d\n", a+b);
     }
 }

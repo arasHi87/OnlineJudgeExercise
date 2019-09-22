@@ -1,22 +1,24 @@
-#include <vector>
 #include <cstdio>
 #include <cstring>
-#include <algorithm>
-#define mem memset
 using namespace std;
-const int maxN=100+10;
-const int maxM=1e3+10;
-int n, m, k, t, a, b, ans;
-int vis[maxN], mth[maxN];
-vector<int> G[maxN];
-int find(int x) {
-    for (int i=0;i<(int)G[x].size();i++) {
-        if (!vis[G[x][i]]) {
-            vis[G[x][i]] = 1;
-            if (mth[G[x][i]]==-1 || find(mth[G[x][i]])) {
-                mth[G[x][i]] = x;
-                return 1;
-            }
+const int maxN=1010;
+struct Edge {
+    int to, next;
+} edge[maxN];
+int n, m, k, idx, cnt, ans;
+int vis[maxN], mth[maxN], head[maxN];
+inline void addedge(int u, int v) {
+    edge[cnt].to=v;
+    edge[cnt].next=head[u];
+    head[u]=cnt++;
+}
+int dfs(int u) {
+    for (int i=head[u];~i;i=edge[i].next) {
+        int v=edge[i].to;
+        if (vis[v]!=idx) {
+            vis[v]=idx;
+            if (mth[v]==-1 || dfs(mth[v]))
+                { mth[v]=u; return 1; }
         }
     }
     return 0;
@@ -27,19 +29,14 @@ int main() {
     #endif
     while (~scanf("%d", &n) && n) {
         scanf("%d%d", &m, &k);
-        ans=0;
-        for (int i=0;i<=n;i++) G[i].clear();
-        mem(vis, 0, sizeof vis);
-        mem(mth, -1, sizeof mth);
-        while (k--) {
-            scanf("%d%d%d", &t, &a, &b);
-            G[a].push_back(b);
+        memset(mth, -1, sizeof mth), cnt=ans=0;
+        memset(head, -1, sizeof head);
+        for (int i=0, t, u, v;i<k;i++) {
+            scanf("%d%d%d", &t, &u, &v);
+            if (u && v) addedge(u, v);
         }
-        for (int i=0;i<n;i++) {
-            mem(vis, 0, sizeof vis);
-            if (mth[i]==-1)
-                ans+=find(i);
-        }
+        for (int i=0;i<n;i++)
+            idx++, ans+=dfs(i);
         printf("%d\n", ans);
     }
 }

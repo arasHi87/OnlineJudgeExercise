@@ -1,58 +1,43 @@
-#include <iostream>
+#include <cstdio>
 #include <algorithm>
 using namespace std;
-const int maxN=1e7;
-typedef long long ll;
-
-struct Max {
-    ll MAX;
-    int left, right;
-} tree[maxN<<2];
-
-ll origin[maxN];
-
-inline void maintain(int root) {
-    int LC=root<<1;
-    int RC=(root<<1)+1;
-    tree[root].MAX=max(tree[LC].MAX, tree[RC].MAX);
+typedef long long LL;
+const int maxN=1e7+10;
+struct Node {
+    LL val;
+    Node *lc, *rc;
+    // Node(): val(0), lc(NULL), rc(NULL) {};
+    void pull() { val=max(lc->val, rc->val); }
+};
+int n, q, a, b;
+LL qs[maxN];
+inline LL max(LL a, LL b) { return a>b?a:b; }
+Node *build(int L, int R) {
+    Node *root=new Node();
+    if (L==R) { root->val=qs[L]; return root; }
+    int mid=(L+R)>>1;
+    root->lc=build(L, mid);
+    root->rc=build(mid+1, R);
+    root->pull();
+    return root;
 }
-
-void build (int root, int start, int end) {
-    tree[root].left=start;
-    tree[root].right=end;
-    if (start==end) {
-        tree[root].MAX=origin[start];
-        return;
-    }
-    int mid=(start+end)>>1;
-    build(root<<1, start, mid);
-    build((root<<1)+1, mid+1, end);
-    maintain(root);
+LL query(Node *root, int L, int R, int ql, int qr) {
+    if (ql>R || qr<L) return -1;
+    if (ql<=L && qr>=R) return root->val;
+    int mid=(L+R)>>1;
+    return max(query(root->lc, L, mid, ql, qr), query(root->rc, mid+1, R, ql, qr));
 }
-
-ll RmaxQ(int root, int start, int end) {
-    cout << root << ' ' << tree[root].left << " " << tree[root].right << endl;
-    if (start==tree[root].left && end==tree[root].right) return tree[root].MAX;
-    int mid=(tree[root].left+tree[root].right)>>1;
-    ll ret=-1;
-    if (end<=mid) ret=max(ret, RmaxQ(root<<1, start, end));
-    else if (start>=mid+1) ret=max(ret, RmaxQ((root<<1)+1, start, end));
-    else {
-        ll a=RmaxQ(root<<1, start, mid);
-        ll b=RmaxQ((root<<1)+1, mid+1, end);
-        ret=max(a, b);
-    }
-    return ret;
-}
-
 int main() {
-    int n, q, a, b;
+    #ifdef local
+        freopen("in", "r", stdin);
+    #endif
     scanf("%d%d", &n, &q);
-    for (int i=1;i<=n;i++) scanf("%lld", &origin[i]);
-    build(1, 1, n);
-    for (int i=1;i<=q;i++) {
+    for (int i=1;i<=n;i++)
+        scanf("%lld", qs+i);
+    Node *root=build(1, n);
+    while (q--) {
         scanf("%d%d", &a, &b);
         if (a>b) swap(a, b);
-        printf("%lld\n", RmaxQ(1, a, b));
+        printf("%lld\n", query(root, 1, n, a, b));
     }
 }
